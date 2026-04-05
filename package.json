@@ -1,5 +1,5 @@
 {
-  "name": "playwrite-recoder",
+  "name": "playwright-recoder",
   "version": "0.1.0",
   "description": "Chrome extension recorder that saves browsing sessions as Playwright steps and replays them with Node.js.",
   "main": "server/index.js",

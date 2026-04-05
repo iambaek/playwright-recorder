@@ -17,10 +17,10 @@ const DEFAULT_SETTINGS = {
 let attachedTabId = null;
 const childToParentTab = new Map();
 const inspectStateByTab = new Map();
-const CONTEXT_MENU_OPEN = "playwrite-recorder-open-panel";
-const CONTEXT_MENU_ATTACH = "playwrite-recorder-attach-tab";
-const CONTEXT_MENU_DETACH = "playwrite-recorder-detach-tab";
-const CONTEXT_MENU_TOGGLE = "playwrite-recorder-toggle-recording";
+const CONTEXT_MENU_OPEN = "playwright-recorder-open-panel";
+const CONTEXT_MENU_ATTACH = "playwright-recorder-attach-tab";
+const CONTEXT_MENU_DETACH = "playwright-recorder-detach-tab";
+const CONTEXT_MENU_TOGGLE = "playwright-recorder-toggle-recording";
 
 async function configureSidePanel() {
   if (!chrome.sidePanel || !chrome.sidePanel.setPanelBehavior) {

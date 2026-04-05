@@ -1,4 +1,4 @@
-const generator = globalThis.PlaywriteRecoderGenerator;
+const generator = globalThis.PlaywrightRecoderGenerator;
 
 let currentRecording = {
   startedAt: null,

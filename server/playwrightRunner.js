@@ -65,7 +65,7 @@ function getUserDataDir(options = {}) {
 }
 
 function getProfilesRootDir(browserName) {
-  return path.join(os.tmpdir(), "playwrite-recoder", "profiles", browserName);
+  return path.join(os.tmpdir(), "playwright-recoder", "profiles", browserName);
 }
 
 function getProfileDir(browserName, profileName) {
@@ -366,7 +366,7 @@ function buildReportHtml(summary) {
     "<head>",
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
-    "<title>Playwrite Recoder Report</title>",
+    "<title>Playwright Recoder Report</title>",
     "<style>",
     "body{font-family:IBM Plex Sans,Segoe UI,sans-serif;background:#f5f5f4;color:#1f2937;margin:0;padding:32px;}",
     ".wrap{max-width:1100px;margin:0 auto;}",
@@ -385,7 +385,7 @@ function buildReportHtml(summary) {
     "<body>",
     "<div class=\"wrap\">",
     "<div class=\"hero\">",
-    "<h1>Playwrite Recoder Report</h1>",
+    "<h1>Playwright Recoder Report</h1>",
     "<div class=\"meta\">Generated at " + escapeHtml(new Date().toISOString()) + "</div>",
     "</div>",
     "<div class=\"grid\">",

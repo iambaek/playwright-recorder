@@ -3,7 +3,7 @@
     module.exports = factory();
     return;
   }
-  root.PlaywriteStepExecutor = factory();
+  root.PlaywrightStepExecutor = factory();
 })(typeof globalThis !== "undefined" ? globalThis : this, function createStepExecutor() {
 
   async function executeStep(page, step, options) {

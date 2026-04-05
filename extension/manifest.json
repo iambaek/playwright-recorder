@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Playwrite Recoder",
+  "name": "Playwright Recoder",
   "version": "0.1.0",
   "description": "Record browsing activity and save it as Playwright-compatible steps.",
   "permissions": [
@@ -33,7 +33,7 @@
     "128": "icons/idle-icon-128.png"
   },
   "action": {
-    "default_title": "Playwrite Recoder",
+    "default_title": "Playwright Recoder",
     "default_icon": {
       "16": "icons/idle-icon-16.png",
       "32": "icons/idle-icon-32.png"

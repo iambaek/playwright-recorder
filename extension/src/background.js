@@ -17,8 +17,8 @@ const DEFAULT_SETTINGS = {
   openSidePanelOnActionClick: true
 };
 const childToParentTab = new Map();
-const CONTEXT_MENU_OPEN = "playwrite-recorder-open-panel";
-const CONTEXT_MENU_TOGGLE = "playwrite-recorder-toggle-recording";
+const CONTEXT_MENU_OPEN = "playwright-recorder-open-panel";
+const CONTEXT_MENU_TOGGLE = "playwright-recorder-toggle-recording";
 
 async function configureSidePanel() {
   if (!chrome.sidePanel || !chrome.sidePanel.setPanelBehavior) {

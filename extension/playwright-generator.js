@@ -4,7 +4,7 @@
     return;
   }
 
-  root.PlaywriteRecoderGenerator = factory();
+  root.PlaywrightRecoderGenerator = factory();
 })(typeof globalThis !== "undefined" ? globalThis : this, function createGenerator() {
   function escapeJs(value) {
     return JSON.stringify(value == null ? "" : String(value));

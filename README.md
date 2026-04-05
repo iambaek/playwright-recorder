@@ -1,4 +1,4 @@
-# Playwrite Recoder
+# Playwright Recoder
 
 Chrome Extension으로 웹 서핑 동작을 기록하고, 그 결과를 Playwright 스크립트와 JSON 세션으로 저장한 뒤 Node.js에서 재생하는 예제 프로젝트입니다.
 
@@ -76,6 +76,6 @@ node server/index.js show-trace ./recordings/traces/trace-xxxx.zip
 
 내부적으로는 기록 이벤트를 그대로 실행하지 않고, `goto / click / dblclick / fill / press / check / uncheck / select / scroll / wait` 형태의 중간 step 포맷으로 변환한 뒤 코드 생성과 재생에 사용합니다.
 
-재사용 프로필은 macOS 기준으로 임시 캐시 경로인 `$(python -c "import tempfile; print(tempfile.gettempdir())")/playwrite-recoder/profiles/chromium/<profile-name>` 아래에 저장됩니다.
+재사용 프로필은 macOS 기준으로 임시 캐시 경로인 `$(python -c "import tempfile; print(tempfile.gettempdir())")/playwright-recoder/profiles/chromium/<profile-name>` 아래에 저장됩니다.
 
 확장하려면 `extension/content.js`에서 이벤트를 더 수집하고 `server/playwrightRunner.js`와 `shared/playwright-generator.js`에서 처리 규칙을 추가하면 됩니다.
