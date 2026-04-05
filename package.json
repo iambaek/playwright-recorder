@@ -5,7 +5,7 @@
   "main": "server/index.js",
   "type": "commonjs",
   "scripts": {
-    "build": "cp shared/playwright-generator.js extension/playwright-generator.js && npx esbuild extension/src/background.js --bundle --format=esm --outfile=extension/dist/background.js --platform=browser --external:../playwright --external:./bidiOverCdp --external:./crxPlayer.js && npx esbuild extension/src/crxPlayer.js --bundle --format=esm --outfile=extension/dist/crxPlayer.js --platform=browser --external:../playwright --external:./bidiOverCdp",
+    "build": "cp shared/playwright-generator.js extension/playwright-generator.js && npx esbuild extension/src/background.js --bundle --format=esm --outfile=extension/dist/background.js --platform=browser --external:../playwright --external:./bidiOverCdp && npx esbuild extension/src/crxPlayer.js --bundle --format=iife --global-name=crxPlayer --outfile=extension/dist/crxPlayer.js --platform=browser --external:../playwright --external:./bidiOverCdp",
     "prestart": "npm run build",
     "start": "node server/index.js serve",
     "replay": "node server/index.js replay",

@@ -1,4 +1,4 @@
-// crxPlayer is loaded dynamically to avoid playwright-crx bundling into the service worker
+// Replay is handled directly in popup context via dist/crxPlayer.js (IIFE global)
 
 const sessions = new Map();
 const idleIconPaths = {
@@ -297,29 +297,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       ok: true,
       recording: makeRecordingPayload(session)
     });
-    return true;
-  }
-
-  if (message.type === "REPLAY_RECORDING") {
-    if (!fromExtensionPage) return false;
-    const recording = message.recording;
-    const options = message.options || {};
-    import('./crxPlayer.js')
-      .then(({ replayRecording }) => replayRecording(recording, options))
-      .then((result) => sendResponse(result))
-      .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
-    return true;
-  }
-
-  if (message.type === "REPLAY_CODE") {
-    if (!fromExtensionPage) return false;
-    function onProgress(info) {
-      chrome.runtime.sendMessage({ type: "REPLAY_PROGRESS", ...info }).catch(() => {});
-    }
-    import('./crxPlayer.js')
-      .then(({ replayCode }) => replayCode(message.code, message.options || {}, onProgress))
-      .then((result) => sendResponse(result))
-      .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
     return true;
   }
 

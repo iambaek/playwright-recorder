@@ -274,23 +274,6 @@ var require_background = __commonJS({
         });
         return true;
       }
-      if (message.type === "REPLAY_RECORDING") {
-        if (!fromExtensionPage) return false;
-        const recording = message.recording;
-        const options = message.options || {};
-        import("./crxPlayer.js").then(({ replayRecording }) => replayRecording(recording, options)).then((result) => sendResponse(result)).catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
-        return true;
-      }
-      if (message.type === "REPLAY_CODE") {
-        let onProgress2 = function(info) {
-          chrome.runtime.sendMessage({ type: "REPLAY_PROGRESS", ...info }).catch(() => {
-          });
-        };
-        var onProgress = onProgress2;
-        if (!fromExtensionPage) return false;
-        import("./crxPlayer.js").then(({ replayCode }) => replayCode(message.code, message.options || {}, onProgress2)).then((result) => sendResponse(result)).catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
-        return true;
-      }
       if (message.type === "QUERY_RECORDING_STATE" && sender.tab && sender.tab.id != null) {
         const senderTabId = sender.tab.id;
         if (childToParentTab.has(senderTabId)) {

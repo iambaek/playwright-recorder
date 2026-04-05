@@ -314,13 +314,25 @@ elements.replayBtn.addEventListener("click", safeHandler(async () => {
 
   const displayedCode = getCurrentCode();
 
-  const result = await chrome.runtime.sendMessage({
-    type: "REPLAY_CODE",
-    code: displayedCode,
-    options: {
-      skipOnError: elements.skipOnErrorCheckbox.checked
-    }
-  });
+  function onProgress(info) {
+    const codeLines = elements.codeOutput.querySelectorAll(".code-line");
+    if (!codeLines.length) return;
+    const stepIndex = info.index;
+    if (stepIndex >= replayAwaitLineMap.length) return;
+    const lineIdx = replayAwaitLineMap[stepIndex];
+    const lineEl = codeLines[lineIdx];
+    if (!lineEl) return;
+    lineEl.classList.remove("line-running", "line-done", "line-skipped", "line-failed");
+    if (info.status === "running") lineEl.classList.add("line-running");
+    else if (info.status === "done") lineEl.classList.add("line-done");
+    else if (info.status === "skipped") lineEl.classList.add("line-skipped");
+    else if (info.status === "failed") lineEl.classList.add("line-failed");
+    lineEl.scrollIntoView({ block: "nearest" });
+  }
+
+  const result = await crxPlayer.replayCode(displayedCode, {
+    skipOnError: elements.skipOnErrorCheckbox.checked
+  }, onProgress);
 
   if (result.ok && (!result.errors || result.errors.length === 0)) {
     setStatus(
@@ -546,33 +558,6 @@ function buildAwaitLineMap() {
   });
 }
 
-chrome.runtime.onMessage.addListener(function (message) {
-  if (message.type !== "REPLAY_PROGRESS") return;
-
-  const codeLines = elements.codeOutput.querySelectorAll(".code-line");
-  if (!codeLines.length) return;
-
-  const stepIndex = message.index;
-  if (stepIndex >= replayAwaitLineMap.length) return;
-
-  const lineIdx = replayAwaitLineMap[stepIndex];
-  const lineEl = codeLines[lineIdx];
-  if (!lineEl) return;
-
-  lineEl.classList.remove("line-running", "line-done", "line-skipped", "line-failed");
-
-  if (message.status === "running") {
-    lineEl.classList.add("line-running");
-  } else if (message.status === "done") {
-    lineEl.classList.add("line-done");
-  } else if (message.status === "skipped") {
-    lineEl.classList.add("line-skipped");
-  } else if (message.status === "failed") {
-    lineEl.classList.add("line-failed");
-  }
-
-  lineEl.scrollIntoView({ block: "nearest" });
-});
 
 function formatCode(code) {
   var lines = code.split("\n");
