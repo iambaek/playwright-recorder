@@ -1,4 +1,4 @@
-import { replayRecording, replayCode } from './crxPlayer.js';
+// crxPlayer is loaded dynamically to avoid playwright-crx bundling into the service worker
 
 const sessions = new Map();
 const idleIconPaths = {
@@ -304,7 +304,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!fromExtensionPage) return false;
     const recording = message.recording;
     const options = message.options || {};
-    replayRecording(recording, options)
+    import('./crxPlayer.js')
+      .then(({ replayRecording }) => replayRecording(recording, options))
       .then((result) => sendResponse(result))
       .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
     return true;
@@ -315,7 +316,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     function onProgress(info) {
       chrome.runtime.sendMessage({ type: "REPLAY_PROGRESS", ...info }).catch(() => {});
     }
-    replayCode(message.code, message.options || {}, onProgress)
+    import('./crxPlayer.js')
+      .then(({ replayCode }) => replayCode(message.code, message.options || {}, onProgress))
       .then((result) => sendResponse(result))
       .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
     return true;
