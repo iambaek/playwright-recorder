@@ -143,9 +143,18 @@ function highlightTypeScript(text) {
 
 function renderCodeLines(codeText) {
   const lines = codeText.split("\n");
-  elements.codeOutput.innerHTML = lines.map(function (line) {
-    return '<div class="code-line"><span class="line-content">' + highlightTypeScript(line) + '</span></div>';
-  }).join("");
+  const fragment = document.createDocumentFragment();
+  lines.forEach(function (line) {
+    const div = document.createElement("div");
+    div.className = "code-line";
+    const span = document.createElement("span");
+    span.className = "line-content";
+    span.innerHTML = highlightTypeScript(line); // escapeHtml applied inside highlightTypeScript
+    div.appendChild(span);
+    fragment.appendChild(div);
+  });
+  elements.codeOutput.textContent = "";
+  elements.codeOutput.appendChild(fragment);
 }
 
 function renderOutputs() {
@@ -361,7 +370,11 @@ function addChatMessage(type, content) {
 function addStatusMessage(text) {
   const msg = document.createElement("div");
   msg.className = "chat-msg ai-status";
-  msg.innerHTML = '<span class="dot-pulse">●</span> ' + escapeHtml(text);
+  const dot = document.createElement("span");
+  dot.className = "dot-pulse";
+  dot.textContent = "●";
+  msg.appendChild(dot);
+  msg.appendChild(document.createTextNode(" " + text));
   elements.chatMessages.appendChild(msg);
   elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
   return msg;
@@ -399,7 +412,9 @@ async function sendAiScenario(prompt, url) {
   if (!data.ok) {
     throw new Error(data.error || "AI scenario request failed");
   }
-
+  if (typeof data.code !== "string") {
+    throw new Error("AI returned invalid response");
+  }
   return data.code;
 }
 
@@ -414,7 +429,9 @@ async function sendAiPrompt(prompt, code) {
   if (!data.ok) {
     throw new Error(data.error || "AI request failed");
   }
-
+  if (typeof data.code !== "string") {
+    throw new Error("AI returned invalid response");
+  }
   return data.code;
 }
 

@@ -22,6 +22,32 @@ const MAX_CONVERSATION_HISTORY = 20;
 const MAX_PROMPT_LENGTH = 10000;
 const MAX_CODE_LENGTH = 100000;
 
+function isValidHttpUrl(value) {
+  if (typeof value !== "string") return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch (_e) {
+    return false;
+  }
+}
+
+function safeResolvePath(rawPath, allowedDir) {
+  const resolved = path.resolve(rawPath);
+  if (!resolved.startsWith(allowedDir + path.sep) && resolved !== allowedDir) {
+    return null;
+  }
+  // Resolve symlinks on the nearest existing ancestor to prevent traversal
+  let check = path.dirname(resolved);
+  try {
+    const real = require("fs").realpathSync(check);
+    if (!real.startsWith(allowedDir)) return null;
+  } catch (_e) {
+    // Ancestor doesn't exist yet — path.resolve check above is sufficient
+  }
+  return resolved;
+}
+
 const ALLOWED_ORIGIN_PATTERN = /^chrome-extension:\/\//;
 
 function createServer() {
@@ -128,8 +154,8 @@ function createServer() {
 
       const reportsDir = path.join(process.cwd(), "recordings", "reports");
       const rawOutput = (req.body && req.body.outputPath) || path.join(reportsDir, "latest-report.html");
-      const resolvedOutput = path.resolve(rawOutput);
-      if (!resolvedOutput.startsWith(path.join(process.cwd(), "recordings"))) {
+      const resolvedOutput = safeResolvePath(rawOutput, path.join(process.cwd(), "recordings"));
+      if (!resolvedOutput) {
         res.status(400).json({ ok: false, error: "Output path must be inside recordings/" });
         return;
       }
@@ -145,9 +171,14 @@ function createServer() {
 
   app.post("/api/ai-scenario", function aiScenario(req, res) {
     const prompt = req.body && typeof req.body.prompt === "string" ? req.body.prompt.slice(0, MAX_PROMPT_LENGTH) : "";
-    const url = req.body && typeof req.body.url === "string" ? req.body.url.slice(0, 2000) : "";
+    const rawUrl = req.body && typeof req.body.url === "string" ? req.body.url.slice(0, 2000) : "";
+    const url = isValidHttpUrl(rawUrl) ? rawUrl : "";
     if (!prompt) {
       res.status(400).json({ ok: false, error: "prompt is required" });
+      return;
+    }
+    if (rawUrl && !url) {
+      res.status(400).json({ ok: false, error: "url must be a valid http/https URL" });
       return;
     }
 
@@ -289,7 +320,7 @@ function createServer() {
           return;
         }
 
-        res.status(500).json({ ok: false, error: "AI did not return recording events. Raw output: " + stdout.slice(0, 500) });
+        res.status(500).json({ ok: false, error: "AI did not return recording events." });
         return;
       }
 
@@ -308,7 +339,7 @@ function createServer() {
         res.json({ ok: true, code: code, events: events });
       } catch (parseErr) {
         console.log("[AI-Scenario] JSON parse error:", parseErr.message);
-        res.status(500).json({ ok: false, error: "Failed to parse recording events: " + parseErr.message });
+        res.status(500).json({ ok: false, error: "Failed to parse recording events." });
       }
     });
 
@@ -462,8 +493,8 @@ function createServer() {
 
       const recordingsDir = path.join(process.cwd(), "recordings");
       const rawOutput = req.body.outputPath || path.join(recordingsDir, "session.js");
-      const resolvedOutput = path.resolve(rawOutput);
-      if (!resolvedOutput.startsWith(recordingsDir)) {
+      const resolvedOutput = safeResolvePath(rawOutput, recordingsDir);
+      if (!resolvedOutput) {
         res.status(400).json({ ok: false, error: "Output path must be inside recordings/" });
         return;
       }

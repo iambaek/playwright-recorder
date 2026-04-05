@@ -328,6 +328,12 @@ async function closeSharedSession(options = {}) {
 
 function openTraceViewer(tracePath) {
   const absolutePath = path.resolve(tracePath);
+  if (path.extname(absolutePath) !== ".zip") {
+    throw new Error("Trace file must be a .zip file");
+  }
+  if (!fs.existsSync(absolutePath)) {
+    throw new Error("Trace file does not exist: " + path.basename(absolutePath));
+  }
   const child = spawn("npx", ["playwright", "show-trace", absolutePath], {
     stdio: "ignore",
     detached: true

@@ -241,7 +241,11 @@ function pushRecordedEvent(session, event) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Messages from extension pages (popup/options) must not have a tab context
+  const fromExtensionPage = !sender.tab;
+
   if (message.type === "START_RECORDING") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     session.recording = true;
@@ -256,6 +260,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "STOP_RECORDING") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     session.recording = false;
@@ -272,6 +277,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "GET_STATE") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     sendResponse({
@@ -284,12 +290,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "GET_RECORDING") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     sendResponse({
       ok: true,
       recording: makeRecordingPayload(session)
     });
+    return true;
+  }
+
+  if (message.type === "REPLAY_RECORDING") {
+    if (!fromExtensionPage) return false;
+    const recording = message.recording;
+    const options = message.options || {};
+    replayRecording(recording, options)
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
+    return true;
+  }
+
+  if (message.type === "REPLAY_CODE") {
+    if (!fromExtensionPage) return false;
+    function onProgress(info) {
+      chrome.runtime.sendMessage({ type: "REPLAY_PROGRESS", ...info }).catch(() => {});
+    }
+    replayCode(message.code, message.options || {}, onProgress)
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
     return true;
   }
 
@@ -332,25 +360,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const event = isPopup ? { ...message.event, isPopup: true } : message.event;
     pushRecordedEvent(session, event);
     sendResponse({ ok: true, count: session.events.length });
-    return true;
-  }
-
-  if (message.type === "REPLAY_RECORDING") {
-    const recording = message.recording;
-    const options = message.options || {};
-    replayRecording(recording, options)
-      .then((result) => sendResponse(result))
-      .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
-    return true;
-  }
-
-  if (message.type === "REPLAY_CODE") {
-    function onProgress(info) {
-      chrome.runtime.sendMessage({ type: "REPLAY_PROGRESS", ...info }).catch(() => {});
-    }
-    replayCode(message.code, message.options || {}, onProgress)
-      .then((result) => sendResponse(result))
-      .catch((error) => sendResponse({ ok: false, errorMessage: error.message }));
     return true;
   }
 

@@ -274,10 +274,19 @@ async function executeStep(page, step) {
   return sharedExecuteStep(page, step, stepOptions);
 }
 
+const ALLOWED_STEP_TYPES = new Set([
+  'goto', 'click', 'dblclick', 'fill', 'press', 'check', 'uncheck',
+  'select', 'scroll', 'wait', 'popup_opened'
+]);
+
 export async function replayCode(codeText, options = {}, onProgress) {
+  if (typeof codeText !== 'string') {
+    throw new Error('Invalid replay code: expected a string');
+  }
   const skipOnError = options.skipOnError === true;
   const notify = typeof onProgress === 'function' ? onProgress : () => {};
-  const steps = parseCodeToSteps(codeText);
+  const rawSteps = parseCodeToSteps(codeText);
+  const steps = rawSteps.filter(step => ALLOWED_STEP_TYPES.has(step.type));
   const crxApp = await getCrxApp();
   let page = await crxApp.newPage();
   let popupPage = null;

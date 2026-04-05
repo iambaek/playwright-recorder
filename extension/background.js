@@ -271,7 +271,11 @@ function pushRecordedEvent(session, event) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Messages from extension pages (popup/options) must not have a tab context
+  const fromExtensionPage = !sender.tab;
+
   if (message.type === "START_RECORDING") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     session.recording = true;
@@ -285,6 +289,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "STOP_RECORDING") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     session.recording = false;
@@ -298,6 +303,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "ATTACH_TAB") {
+    if (!fromExtensionPage) return false;
     chrome.tabs.get(message.tabId, async (tab) => {
       const attached = await attachTab(tab);
       sendResponse({ ok: true, attachedTab: attached });
@@ -306,6 +312,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "DETACH_TAB") {
+    if (!fromExtensionPage) return false;
     detachTab()
       .then((tabId) => {
         sendResponse({ ok: true, detachedTabId: tabId });
@@ -333,6 +340,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "GET_STATE") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     const inspect = getInspectState(tabId);
@@ -348,6 +356,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "GET_RECORDING") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const session = getSession(tabId);
     sendResponse({
@@ -409,6 +418,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "SET_INSPECT_MODE") {
+    if (!fromExtensionPage) return false;
     const tabId = message.tabId;
     const inspect = getInspectState(tabId);
     inspect.enabled = Boolean(message.enabled);
